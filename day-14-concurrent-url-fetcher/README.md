@@ -11,10 +11,6 @@ A concurrent URL fetcher built in Go using worker pool pattern.
 - Context-based timeout
 - Error handling
 
-## Purpose of the program
-
-The purpose of this program is to fetch multiple URLs concurrently using goroutines and channels.
-
 ## Tech Used
 
 - Goroutines
