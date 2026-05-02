@@ -11,6 +11,12 @@
 - PostgreSQL
 - pq driver
 
+## Command To Install Package
+
+```bash
+go get github.com/lib/pq
+```
+
 ## Key Learnings
 
 - DB connection in Go
