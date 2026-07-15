@@ -1,13 +1,13 @@
 
-syntax = "proto3"
+syntax = "proto3";
 
 package user;
 
-option go_package = "day-30-grpc/pb"
+option go_package = "./pb";
 
 service UserService {
-    rpc CreateUser(CreateUserRequest)
-        returns (UserResponse);
+    rpc CreateUser(CreateUserRequest) returns (UserResponse);
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
 }
 
 message CreateUserRequest {
@@ -17,12 +17,20 @@ message CreateUserRequest {
 }
 
 message User {
-    int32 id = 1;
+    int64 id = 1;
     string name = 2;
     string email = 3;
     string password = 4;
 }
 
 message UserResponse {
-    User user = 1
+    User user = 1;
+}
+
+message GetUserRequest {
+    int64 id = 1;
+}
+
+message GetUserResponse {
+    User user = 1;
 }
