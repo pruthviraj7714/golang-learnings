@@ -6,7 +6,7 @@ package user;
 option go_package = "./pb";
 
 service UserService {
-    rpc CreateUser(CreateUserRequest) returns (UserResponse);
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
     rpc GetUser(GetUserRequest) returns (GetUserResponse);
 }
 
@@ -23,7 +23,7 @@ message User {
     string password = 4;
 }
 
-message UserResponse {
+message CreateUserResponse {
     User user = 1;
 }
 
