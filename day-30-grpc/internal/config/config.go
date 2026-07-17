@@ -8,7 +8,6 @@ import (
 )
 
 type Config struct {
-	PORT  string
 	DBURL string
 }
 
@@ -31,7 +30,6 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		PORT:  getEnv("PORT", "8080"),
 		DBURL: getEnv("DATABASE_URL", "postgresql://postgres:password@localhost:5432"),
 	}
 }

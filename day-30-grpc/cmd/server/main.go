@@ -9,17 +9,17 @@ import (
 	"log"
 	"net"
 
-	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"gorm.io/gorm"
 )
 
-type userserver struct {
+type UserServer struct {
 	pb.UnimplementedUserServiceServer
 	DB *gorm.DB
 }
 
-func (s *userserver) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+func (s *UserServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 
 	user := models.User{
 		Name:     req.Name,
@@ -43,7 +43,7 @@ func (s *userserver) CreateUser(ctx context.Context, req *pb.CreateUserRequest) 
 	}, nil
 }
 
-func (s *userserver) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+func (s *UserServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 	var user models.User
 
 	err := s.DB.First(&user, req.Id).Error
@@ -62,9 +62,51 @@ func (s *userserver) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.G
 	}, nil
 }
 
-func main() {
-	r := gin.Default()
+func (s *UserServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
+	var user models.User
 
+	err := s.DB.Find(&user, req.Id).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	user.Email = req.Email
+	user.Name = req.Name
+	user.Password = req.Password
+
+	err = s.DB.Save(&user).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.UpdateUserResponse{
+		User: &pb.User{
+			Id:       user.ID,
+			Name:     user.Name,
+			Email:    user.Email,
+			Password: user.Password,
+		},
+	}, nil
+
+}
+
+func (s *UserServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
+	var user models.User
+
+	err := s.DB.Delete(&user, req.Id).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.DeleteUserResponse{
+		Success: true,
+	}, nil
+}
+
+func main() {
 	cfg := config.LoadConfig()
 
 	db := database.Connect(cfg.DBURL)
@@ -76,17 +118,16 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	userService := &userserver{
+	userService := &UserServer{
 		DB: db,
 	}
 
 	pb.RegisterUserServiceServer(grpcServer, userService)
+	reflection.Register(grpcServer)
 
 	log.Printf("gRPC server starting on port :50051...")
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-
-	r.Run(cfg.PORT)
 }
